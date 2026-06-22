@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UWorld Notes</title>
+<style>
+  :root[data-theme="dark"]{
+    --bg:#0f0f0f;
+    --bg-sidebar:#121212;
+    --bg-card:#1a1a1a;
+    --bg-card-hover:#222222;
+    --bg-modal:#171717;
+    --text:#e9eaed;
+    --text-dim:#9aa0aa;
+    --text-faint:#6b7280;
+    --border:#272727;
+    --accent:#e3a23c;
+    --accent-text:#1a1406;
+    --danger:#e2615a;
+    --danger-bg:rgba(226,97,90,0.12);
+    --shadow:0 8px 24px rgba(0,0,0,0.55);
+    --overlay:rgba(0,0,0,0.7);
+  }
+  :root[data-theme="light"]{
+    --bg:#faf8f3;
+    --bg-sidebar:#f1ece1;
+    --bg-card:#ffffff;
+    --bg-card-hover:#fbf6ec;
+    --bg-modal:#ffffff;
+    --text:#2b2924;
+    --text-dim:#736b5c;
+    --text-faint:#a89e8c;
+    --border:#e6ddc9;
+    --accent:#c4791c;
+    --accent-text:#fff8ec;
+    --danger:#c0392b;
+    --danger-bg:rgba(192,57,43,0.08);
+    --shadow:0 8px 24px rgba(60,45,20,0.12);
+    --overlay:rgba(40,30,15,0.4);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    font-family:"Segoe UI","Tahoma","Geneva",Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    height:100vh;
+    overflow:hidden;
+    transition:background .2s ease,color .2s ease;
+  }
+  #app{display:flex;height:100vh;}
+
+  /* ---------- Sidebar ---------- */
+  #sidebar{
+    width:270px;
+    flex-shrink:0;
+    background:var(--bg-sidebar);
+    border-left:1px solid var(--border);
+    display:flex;
+    flex-direction:column;
+    padding:16px 14px;
+    overflow-y:auto;
+  }
+  .brand{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-bottom:4px;
+  }
+  .brand-title{
+    font-size:19px;font-weight:800;letter-spacing:.2px;
+    display:flex;align-items:center;gap:8px;
+  }
+  .brand-dot{
+    width:10px;height:10px;border-radius:3px;background:var(--accent);
+    transform:rotate(45deg);flex-shrink:0;
+  }
+  .brand-actions{display:flex;gap:6px;}
+  .shared-badge{
+    font-size:11px;color:var(--text-faint);background:var(--bg);
+    border:1px solid var(--border);border-radius:20px;padding:5px 10px;
+    margin-bottom:16px;line-height:1.6;
+  }
+  .icon-btn{
+    background:transparent;border:1px solid var(--border);color:var(--text-dim);
+    width:34px;height:34px;border-radius:9px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    font-size:16px;transition:.15s;
+  }
+  .icon-btn:hover{background:var(--bg-card-hover);color:var(--text);}
+
+  .sidebar-section-label{
+    font-size:11px;color:var(--text-faint);font-weight:700;
+    text-transform:uppercase;letter-spacing:.06em;margin:10px 4px 8px;
+  }
+  #folder-list{display:flex;flex-direction:column;gap:4px;flex:1;}
+  .folder-item{
+    display:flex;align-items:center;gap:10px;
+    padding:9px 10px;border-radius:10px;cursor:pointer;
+    color:var(--text-dim);position:relative;
+    border:1px solid transparent;
+  }
+  .folder-item:hover{background:var(--bg-card-hover);color:var(--text);}
+  .folder-item.active{
+    background:var(--bg-card);color:var(--text);border-color:var(--border);
+    font-weight:700;
+  }
+  .folder-avatar{
+    width:28px;height:28px;border-radius:8px;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    font-size:13px;font-weight:800;color:#fff;
+  }
+  .folder-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:14.5px;}
+  .folder-count{
+    font-size:11.5px;color:var(--text-faint);background:var(--bg);
+    border:1px solid var(--border);border-radius:20px;padding:2px 8px;flex-shrink:0;
+  }
+  .folder-item.active .folder-count{color:var(--text-dim);}
+  .folder-del{
+    opacity:0;width:24px;height:24px;border-radius:6px;border:none;background:transparent;
+    color:var(--text-faint);cursor:pointer;display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;font-size:14px;
+  }
+  .folder-item:hover .folder-del{opacity:1;}
+  .folder-del:hover{background:var(--danger-bg);color:var(--danger);}
+
+  #add-folder-wrap{margin-top:10px;}
+  .add-folder-btn{
+    width:100%;padding:10px;border-radius:10px;border:1.5px dashed var(--border);
+    background:transparent;color:var(--text-dim);cursor:pointer;font-size:14px;font-weight:600;
+    display:flex;align-items:center;justify-content:center;gap:6px;
+  }
+  .add-folder-btn:hover{border-color:var(--accent);color:var(--accent);}
+  .add-folder-form{display:flex;gap:6px;}
+  .add-folder-form input{
+    flex:1;padding:9px 11px;border-radius:9px;border:1.5px solid var(--accent);
+    background:var(--bg-card);color:var(--text);font-size:14px;outline:none;
+    font-family:inherit;
+  }
+  .add-folder-form button{
+    background:var(--accent);color:var(--accent-text);border:none;border-radius:9px;
+    padding:0 13px;font-weight:700;cursor:pointer;font-size:14px;
+  }
+
+  /* ---------- Main ---------- */
+  #main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+  #main-header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:18px 26px;border-bottom:1px solid var(--border);flex-shrink:0;gap:14px;
+  }
+  #header-left{display:flex;align-items:center;gap:12px;min-width:0;}
+  #hamburger{display:none;}
+  #folder-title{font-size:20px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  #folder-sub{font-size:12.5px;color:var(--text-faint);font-weight:500;}
+  #header-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+  .btn-primary{
+    background:var(--accent);color:var(--accent-text);border:none;border-radius:10px;
+    padding:10px 16px;font-weight:700;font-size:14px;cursor:pointer;display:flex;
+    align-items:center;gap:6px;flex-shrink:0;transition:.15s;
+  }
+  .btn-primary:hover{filter:brightness(1.07);}
+  .btn-primary:disabled{opacity:.4;cursor:not-allowed;}
+
+  #notes-scroll{flex:1;overflow-y:auto;padding:22px 26px 40px;}
+  #notes-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
+    gap:16px;
+  }
+  .note-card{
+    background:var(--bg-card);border:1px solid var(--border);border-radius:14px;
+    padding:16px;cursor:pointer;display:flex;flex-direction:column;gap:10px;
+    transition:.15s;min-height:120px;
+  }
+  .note-card:hover{background:var(--bg-card-hover);transform:translateY(-1px);box-shadow:var(--shadow);}
+  .note-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
+  .note-badge{
+    width:34px;height:34px;border-radius:50%;border:2px solid var(--accent);
+    color:var(--accent);font-weight:800;font-size:14px;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .note-title{font-size:15.5px;font-weight:700;line-height:1.4;flex:1;}
+  .note-preview{
+    font-size:13px;color:var(--text-dim);line-height:1.6;
+    display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
+    white-space:pre-wrap;
+  }
+  .note-imgs{display:flex;gap:6px;margin-top:auto;}
+  .note-imgs img{
+    width:42px;height:42px;border-radius:8px;object-fit:cover;border:1px solid var(--border);
+  }
+  .note-imgs .more-badge{
+    width:42px;height:42px;border-radius:8px;border:1px solid var(--border);
+    display:flex;align-items:center;justify-content:center;font-size:12px;
+    color:var(--text-faint);background:var(--bg);
+  }
+  .note-date{font-size:11px;color:var(--text-faint);}
+
+  /* ---------- Empty states ---------- */
+  .empty-state{
+    height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;color:var(--text-dim);gap:10px;padding:40px;
+  }
+  .empty-state .big{font-size:42px;}
+  .empty-state h3{margin:0;font-size:17px;color:var(--text);}
+  .empty-state p{margin:0;font-size:14px;max-width:320px;line-height:1.7;}
+
+  /* ---------- Modal ---------- */
+  .overlay{
+    position:fixed;inset:0;background:var(--overlay);display:flex;align-items:center;
+    justify-content:center;z-index:50;padding:20px;
+  }
+  .modal{
+    background:var(--bg-modal);border-radius:16px;border:1px solid var(--border);
+    width:100%;max-width:520px;max-height:88vh;display:flex;flex-direction:column;
+    box-shadow:var(--shadow);
+  }
+  .modal-header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:18px 20px;border-bottom:1px solid var(--border);flex-shrink:0;
+  }
+  .modal-header h3{margin:0;font-size:16px;font-weight:800;display:flex;align-items:center;gap:10px;}
+  .modal-body{padding:18px 20px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:14px;}
+  .modal-footer{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:14px 20px;border-top:1px solid var(--border);flex-shrink:0;gap:10px;
+  }
+  .field-label{font-size:12.5px;font-weight:700;color:var(--text-dim);margin-bottom:6px;display:block;}
+  input.text-input, textarea.text-input{
+    width:100%;background:var(--bg);border:1px solid var(--border);border-radius:10px;
+    padding:11px 13px;color:var(--text);font-size:14.5px;font-family:inherit;outline:none;
+    resize:vertical;
+  }
+  input.text-input:focus, textarea.text-input:focus{border-color:var(--accent);}
+  textarea.text-input{min-height:150px;line-height:1.7;}
+  .btn-ghost{
+    background:transparent;border:1.5px solid var(--border);color:var(--text-dim);
+    border-radius:10px;padding:9px 15px;font-weight:700;font-size:14px;cursor:pointer;
+  }
+  .btn-ghost:hover{background:var(--bg-card-hover);color:var(--text);}
+  .btn-danger-ghost{
+    background:transparent;border:1.5px solid var(--danger);color:var(--danger);
+    border-radius:10px;padding:9px 15px;font-weight:700;font-size:13.5px;cursor:pointer;
+  }
+  .btn-danger-ghost:hover{background:var(--danger-bg);}
+  .footer-right{display:flex;gap:8px;}
+
+  .img-upload-btn{
+    border:1.5px dashed var(--border);border-radius:10px;padding:10px 14px;
+    color:var(--text-dim);cursor:pointer;font-size:13.5px;font-weight:600;
+    display:inline-flex;align-items:center;gap:6px;
+  }
+  .img-upload-btn:hover{border-color:var(--accent);color:var(--accent);}
+  #img-previews{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+  .img-preview{
+    position:relative;width:64px;height:64px;border-radius:10px;overflow:hidden;
+    border:1px solid var(--border);
+  }
+  .img-preview img{width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in;}
+  .img-remove{
+    position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;
+    background:rgba(0,0,0,0.65);color:#fff;border:none;font-size:11px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .confirm-text{font-size:14px;color:var(--text-dim);line-height:1.7;}
+
+  /* note view (read-only) */
+  .view-content{
+    font-size:15px;line-height:1.8;color:var(--text);
+    white-space:pre-wrap;word-break:break-word;
+  }
+  .view-imgs{display:flex;flex-direction:column;gap:10px;}
+  .view-img{
+    width:100%;height:auto;max-width:100%;
+    border-radius:10px;border:1px solid var(--border);
+    cursor:zoom-in;display:block;background:var(--bg);
+  }
+
+  /* lightbox */
+  .lightbox{
+    position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:80;
+    display:flex;align-items:center;justify-content:center;padding:30px;cursor:zoom-out;
+  }
+  .lightbox img{max-width:100%;max-height:100%;border-radius:8px;}
+
+  ::-webkit-scrollbar{width:9px;height:9px;}
+  ::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+
+  .toast{
+    position:fixed;bottom:22px;left:50%;transform:translateX(-50%);
+    background:var(--bg-card);border:1px solid var(--border);color:var(--text);
+    padding:10px 18px;border-radius:10px;font-size:13.5px;box-shadow:var(--shadow);
+    z-index:100;opacity:0;transition:opacity .25s;pointer-events:none;
+  }
+  .toast.show{opacity:1;}
+
+  /* mobile */
+  @media (max-width:760px){
+    #sidebar{
+      position:fixed;inset:0 25% 0 auto;z-index:40;width:78%;max-width:300px;
+      transform:translateX(105%);transition:transform .22s ease;box-shadow:var(--shadow);
+    }
+    html[dir="rtl"] #sidebar{transform:translateX(-105%);}
+    body.sidebar-open #sidebar{transform:translateX(0);}
+    #backdrop{
+      position:fixed;inset:0;background:var(--overlay);z-index:35;display:none;
+    }
+    body.sidebar-open #backdrop{display:block;}
+    #hamburger{display:flex;}
+    #notes-grid{grid-template-columns:1fr;}
+    #main-header{padding:14px 16px;}
+    #notes-scroll{padding:16px 16px 40px;}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="backdrop" onclick="closeSidebarMobile()"></div>
+
+  <aside id="sidebar">
+    <div class="brand">
+      <div class="brand-title"><span class="brand-dot"></span> UWorld Notes</div>
+      <div class="brand-actions">
+        <button class="icon-btn" id="refresh-folders-btn" title="تحديث">🔄</button>
+        <button class="icon-btn" id="theme-toggle" title="تبديل المظهر">🌙</button>
+      </div>
+    </div>
+    <div class="shared-badge">📚 موقع عباد الرحمن لنوتس الامتحان</div>
+    <div class="shared-badge" id="conn-status" style="margin-top:6px;">⏳ بنتأكد من الاتصال بقاعدة البيانات...</div>
+
+    <div class="sidebar-section-label">المجلدات</div>
+    <div id="folder-list"></div>
+
+    <div id="add-folder-wrap"></div>
+  </aside>
+
+  <main id="main">
+    <div id="main-header">
+      <div id="header-left">
+        <button class="icon-btn" id="hamburger" onclick="openSidebarMobile()">☰</button>
+        <div>
+          <div id="folder-title">اختار مجلد</div>
+          <div id="folder-sub"></div>
+        </div>
+      </div>
+      <div id="header-right">
+        <button class="icon-btn" id="refresh-notes-btn" title="تحديث النوتس">🔄</button>
+        <button class="btn-primary" id="new-note-btn" onclick="openNoteEditModal()" disabled>＋ نوت جديدة</button>
+      </div>
+    </div>
+    <div id="notes-scroll">
+      <div id="notes-grid"></div>
+    </div>
+  </main>
+</div>
+
+<div id="modal-root"></div>
+<div id="toast" class="toast"></div>
+
+<script>
+/* =====================================================================
+   This is a SHARED site: folders + notes are stored with shared=true,
+   so every visitor with the link reads and writes the same data via
+   Firebase. Theme preference is stored personally (shared=false) per
+   visitor in localStorage only.
+
+   IMPORTANT: if Firebase can't be reached (wrong Rules, no internet),
+   shared reads/writes now fail LOUDLY (toast + the "conn-status" badge
+   in the sidebar) instead of silently falling back to this device's
+   own localStorage — that old fallback is what made every visitor see
+   only their own private notes instead of the shared ones.
+   ===================================================================== */
+
+/* ===================== Storage helpers ===================== */
+let connOk = null; // null = unknown yet, true/false after first shared call
+function setConnStatus(ok){
+  if(connOk === ok) return;
+  connOk = ok;
+  const el = document.getElementById('conn-status');
+  if(el){
+    if(ok){
+      el.textContent = '✅ متصل بقاعدة البيانات المشتركة';
+      el.style.color = '';
+    } else {
+      el.textContent = '⚠️ غير متصل — النوتس دلوقتي مش بتتشارك';
+      el.style.color = 'var(--danger)';
+    }
+  }
+  if(!ok){
+    showToast('تعذر الاتصال بقاعدة البيانات المشتركة (Firebase). راجع الإنترنت أو إعدادات Rules.');
+  }
+}
+async function sGet(key, shared){
+  if(window.storage){
+    try{
+      const r = await window.storage.get(key, shared);
+      if(shared) setConnStatus(true);
+      return r ? JSON.parse(r.value) : null;
+    }catch(e){
+      console.error('[storage:get]', key, e);
+      // For SHARED keys we deliberately do NOT fall back to this device's local
+      // copy — that fallback used to hide Firebase errors and made every visitor
+      // see only their own browser's notes instead of the shared ones.
+      if(shared){ setConnStatus(false); return null; }
+    }
+  }
+  try{
+    const v = localStorage.getItem(key);
+    return v ? JSON.parse(v) : null;
+  }catch(e){ return null; }
+}
+async function sSet(key, value, shared, silent){
+  if(window.storage){
+    try{
+      await window.storage.set(key, JSON.stringify(value), shared);
+      if(shared) setConnStatus(true);
+      return true;
+    }catch(e){
+      if(!silent) console.error('[storage:set]', key, e);
+      if(shared){ setConnStatus(false); return false; }
+    }
+  }
+  try{
+    localStorage.setItem(key, JSON.stringify(value));
+    return true;
+  }catch(e){
+    if(!silent) console.error(e);
+    return false;
+  }
+}
+async function sDelete(key, shared){
+  if(window.storage){
+    try{
+      await window.storage.delete(key, shared);
+      if(shared) setConnStatus(true);
+      return;
+    }catch(e){
+      console.error('[storage:delete]', key, e);
+      if(shared){ setConnStatus(false); return; }
+    }
+  }
+  try{ localStorage.removeItem(key); }catch(e){}
+}
+
+/* ===================== State ===================== */
+let folders = [];          // [{id,name,color,createdAt}]  -- SHARED
+let notesByFolder = {};    // {folderId: [note,...]}        -- SHARED
+let currentFolderId = null;
+let theme = 'dark';
+let editingNote = null;
+let pendingImages = [];
+let addFolderOpen = false;
+
+const PALETTE = ['#e3a23c','#5fa8d3','#7fb069','#c97f9b','#9b7fd4','#d97c5c','#5fb3a3','#c4a35a'];
+
+function colorForFolder(id){
+  let h = 0;
+  for(const ch of id) h = (h*31 + ch.charCodeAt(0)) % 997;
+  return PALETTE[h % PALETTE.length];
+}
+function uid(prefix){
+  return prefix + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+}
+function escapeHtml(s){
+  return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function formatDate(ts){
+  const d = new Date(ts);
+  return d.toLocaleDateString('ar-EG', {day:'numeric', month:'short', year:'numeric'});
+}
+let toastTimer=null;
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+/* ===================== Init ===================== */
+async function init(){
+  const savedTheme = await sGet('app:theme', false);   // personal
+  theme = savedTheme || 'dark';
+  applyTheme();
+
+  await refreshFolders();
+
+  if(folders.length) currentFolderId = folders[0].id;
+  if(currentFolderId) await loadNotesForFolder(currentFolderId, true);
+
+  renderSidebar();
+  renderMain();
+  await maybeOfferMigration();
+}
+
+function applyTheme(){
+  document.documentElement.setAttribute('data-theme', theme);
+  document.getElementById('theme-toggle').textContent = theme === 'dark' ? '☀️' : '🌙';
+}
+
+async function refreshFolders(){
+  const data = await sGet('app:folders', true);   // shared
+  folders = data || [];
+}
+
+async function loadNotesForFolder(folderId, force){
+  if(notesByFolder[folderId] && !force) return;
+  const data = await sGet('app:notes:' + folderId, true);   // shared
+  notesByFolder[folderId] = data || [];
+}
+
+/* ===================== One-time migration ===================== */
+/* If this browser has folders saved from BEFORE Firebase was connected
+   (pure localStorage), and the shared database is currently empty,
+   offer to copy them up so every visitor sees them too. */
+async function maybeOfferMigration(){
+  let localFolders = [];
+  try{ localFolders = JSON.parse(localStorage.getItem('app:folders') || 'null') || []; }catch(e){}
+  if(!localFolders.length || folders.length) return;
+
+  showModal(`
+    <div class="modal-header"><h3>📦 نقل النوتس المحفوظة على جهازك</h3></div>
+    <div class="modal-body">
+      <div class="confirm-text">
+        لاقينا ${localFolders.length} مجلد محفوظين على المتصفح ده من قبل ربط الموقع بقاعدة البيانات المشتركة.
+        تحب ننقلهم للموقع المشترك عشان يظهروا لأي حد يفتح اللينك (زي صاحبك)؟
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" id="skip-migrate">تجاهل</button>
+      <button class="btn-primary" id="confirm-migrate">نقل النوتس</button>
+    </div>
+  `);
+  document.getElementById('skip-migrate').onclick = closeModal;
+  document.getElementById('confirm-migrate').onclick = async ()=>{
+    closeModal();
+    await migrateLocalToShared(localFolders);
+  };
+}
+
+async function migrateLocalToShared(localFolders){
+  showToast('بننقل النوتس...');
+  const ok = await sSet('app:folders', localFolders, true);
+  if(!ok){
+    showToast('فشل النقل — مفيش اتصال بقاعدة البيانات المشتركة دلوقتي');
+    return;
+  }
+  for(const f of localFolders){
+    let localNotes = [];
+    try{ localNotes = JSON.parse(localStorage.getItem('app:notes:' + f.id) || 'null') || []; }catch(e){}
+    if(localNotes.length) await sSet('app:notes:' + f.id, localNotes, true);
+  }
+  await refreshFolders();
+  if(folders.length){
+    currentFolderId = folders[0].id;
+    await loadNotesForFolder(currentFolderId, true);
+  }
+  renderSidebar();
+  renderMain();
+  showToast('تم نقل النوتس للموقع المشترك ✅');
+}
+
+/* ===================== Sidebar ===================== */
+function renderSidebar(){
+  const list = document.getElementById('folder-list');
+  list.innerHTML = '';
+  if(folders.length === 0){
+    const hint = document.createElement('div');
+    hint.style.cssText = 'font-size:13px;color:var(--text-faint);padding:8px 4px;line-height:1.7;';
+    hint.textContent = 'لسه مفيش مجلدات. اعمل أول مجلد، مثلاً "هيماتولوجي".';
+    list.appendChild(hint);
+  }
+  folders.forEach(f=>{
+    const count = (notesByFolder[f.id] || []).length;
+    const item = document.createElement('div');
+    item.className = 'folder-item' + (f.id===currentFolderId ? ' active':'');
+    item.innerHTML = `
+      <div class="folder-avatar" style="background:${f.color}">${escapeHtml(f.name.trim()[0] || '#')}</div>
+      <div class="folder-name">${escapeHtml(f.name)}</div>
+      <div class="folder-count">${count}</div>
+      <button class="folder-del" title="Delete Folder">🗑️</button>
+    `;
+    item.addEventListener('click', (e)=>{
+      if(e.target.closest('.folder-del')) return;
+      selectFolder(f.id);
+    });
+    item.querySelector('.folder-del').addEventListener('click', (e)=>{
+      e.stopPropagation();
+      confirmDeleteFolder(f);
+    });
+    list.appendChild(item);
+  });
+
+  const addWrap = document.getElementById('add-folder-wrap');
+  if(addFolderOpen){
+    addWrap.innerHTML = `
+      <form class="add-folder-form" id="add-folder-form">
+        <input type="text" id="new-folder-input" placeholder="اسم المجلد، مثلاً هيماتولوجي" maxlength="40" autocomplete="off">
+        <button type="submit">إضافة</button>
+      </form>
+    `;
+    const input = document.getElementById('new-folder-input');
+    setTimeout(()=>input.focus(), 0);
+    document.getElementById('add-folder-form').addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const name = input.value.trim();
+      addFolderOpen = false;
+      if(name) addFolder(name);
+      else renderSidebar();
+    });
+    input.addEventListener('keydown', (e)=>{
+      if(e.key === 'Escape'){ addFolderOpen=false; renderSidebar(); }
+    });
+  } else {
+    addWrap.innerHTML = `<button class="add-folder-btn" id="open-add-folder">＋ مجلد جديد</button>`;
+    document.getElementById('open-add-folder').addEventListener('click', ()=>{
+      addFolderOpen = true;
+      renderSidebar();
+    });
+  }
+}
+
+async function addFolder(name){
+  // re-fetch fresh first, in case another visitor added a folder meanwhile
+  const fresh = await sGet('app:folders', true) || [];
+  const f = { id: uid('f'), name, color: '', createdAt: Date.now() };
+  f.color = colorForFolder(f.id);
+  fresh.push(f);
+  folders = fresh;
+  notesByFolder[f.id] = [];
+  await sSet('app:folders', folders, true);
+  await selectFolder(f.id);
+}
+
+function confirmDeleteFolder(folder){
+  const count = (notesByFolder[folder.id] || []).length;
+  showModal(`
+    <div class="modal-header"><h3>🗑 حذف "${escapeHtml(folder.name)}"</h3></div>
+    <div class="modal-body">
+      <div class="confirm-text">
+        هتحذف المجلد ده وكل النوتس اللي فيه${count ? ` (${count} نوت)` : ''} لكل اللي بيستخدموا اللينك.
+        الخطوة دي ما تتراجعش فيها.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" id="cancel-del-folder">إلغاء</button>
+      <button class="btn-danger-ghost" id="confirm-del-folder">حذف نهائي</button>
+    </div>
+  `);
+  document.getElementById('cancel-del-folder').onclick = closeModal;
+  document.getElementById('confirm-del-folder').onclick = async ()=>{
+    await deleteFolder(folder.id);
+    closeModal();
+  };
+}
+
+async function deleteFolder(folderId){
+  const fresh = await sGet('app:folders', true) || [];
+  folders = fresh.filter(f=>f.id !== folderId);
+  delete notesByFolder[folderId];
+  await sSet('app:folders', folders, true);
+  await sDelete('app:notes:' + folderId, true);
+  if(currentFolderId === folderId){
+    currentFolderId = folders.length ? folders[0].id : null;
+    if(currentFolderId) await loadNotesForFolder(currentFolderId, true);
+  }
+  renderSidebar();
+  renderMain();
+  showToast('تم حذف المجلد');
+}
+
+async function selectFolder(folderId){
+  currentFolderId = folderId;
+  await loadNotesForFolder(folderId, true);   // always pull latest from other visitors
+  renderSidebar();
+  renderMain();
+  closeSidebarMobile();
+}
+
+/* ===================== Main / Notes ===================== */
+function renderMain(){
+  const titleEl = document.getElementById('folder-title');
+  const subEl = document.getElementById('folder-sub');
+  const grid = document.getElementById('notes-grid');
+  const newBtn = document.getElementById('new-note-btn');
+  grid.innerHTML = '';
+
+  if(!currentFolderId){
+    titleEl.textContent = 'اختار مجلد';
+    subEl.textContent = '';
+    newBtn.disabled = true;
+    grid.innerHTML = `
+      <div class="empty-state" style="grid-column:1/-1">
+        <div class="big">🗂️</div>
+        <h3>اختار أو اعمل مجلد الأول</h3>
+        <p>استخدم زرار "＋ مجلد جديد" في الشريط الجانبي عشان تبدأ، مثلاً مجلد اسمه هيماتولوجي.</p>
+      </div>`;
+    return;
+  }
+
+  const folder = folders.find(f=>f.id===currentFolderId);
+  const notes = notesByFolder[currentFolderId] || [];
+  titleEl.textContent = folder ? folder.name : '';
+  subEl.textContent = notes.length ? `${notes.length} نوت` : 'لسه مفيش نوتس';
+  newBtn.disabled = false;
+
+  if(notes.length === 0){
+    grid.innerHTML = `
+      <div class="empty-state" style="grid-column:1/-1">
+        <div class="big">📝</div>
+        <h3>لسه مفيش نوتس هنا</h3>
+        <p>دوس على "＋ نوت جديدة" وابدأ نوت رقم 1 في مجلد ${escapeHtml(folder.name)}.</p>
+      </div>`;
+    return;
+  }
+
+  notes.forEach((note, idx)=>{
+    const card = document.createElement('div');
+    card.className = 'note-card';
+    const imgsHtml = (note.images && note.images.length)
+      ? `<div class="note-imgs">
+          ${note.images.slice(0,3).map(im=>`<img src="${im.data}">`).join('')}
+          ${note.images.length>3 ? `<div class="more-badge">+${note.images.length-3}</div>` : ''}
+        </div>` : '';
+    card.innerHTML = `
+      <div class="note-top">
+        <div class="note-badge">${idx+1}</div>
+        <div class="note-title">${escapeHtml(note.title) || 'بدون عنوان'}</div>
+      </div>
+      <div class="note-preview">${escapeHtml(note.content)}</div>
+      ${imgsHtml}
+      <div class="note-date">${formatDate(note.createdAt)}</div>
+    `;
+    card.addEventListener('click', ()=>openNoteViewModal(note));
+    grid.appendChild(card);
+  });
+}
+
+/* ===================== Note view (read-only) ===================== */
+async function openNoteViewModal(note){
+  // pull the freshest copy first in case another visitor edited/deleted it
+  await loadNotesForFolder(currentFolderId, true);
+  renderMain();
+  const fresh = (notesByFolder[currentFolderId] || []).find(n => n.id === note.id);
+  if(!fresh){ showToast('النوت ده مش موجود دلوقتي'); return; }
+  note = fresh;
+
+  const folder = folders.find(f=>f.id===currentFolderId);
+  const notes = notesByFolder[currentFolderId] || [];
+  const noteNumber = notes.findIndex(n=>n.id===note.id)+1;
+  const imgsHtml = (note.images && note.images.length)
+    ? `<div class="view-imgs">${note.images.map(im=>`<img src="${im.data}" class="view-img" data-src="${im.data}">`).join('')}</div>`
+    : '';
+
+  showModal(`
+    <div class="modal-header">
+      <h3><span class="note-badge" style="width:28px;height:28px;font-size:12px;">${noteNumber}</span>
+        ${escapeHtml(note.title) || 'بدون عنوان'} — ${escapeHtml(folder ? folder.name : '')}
+      </h3>
+      <button class="icon-btn" id="close-view-modal">✕</button>
+    </div>
+    <div class="modal-body">
+      ${note.content ? `<div class="view-content">${escapeHtml(note.content)}</div>` : ''}
+      ${imgsHtml}
+      <div class="note-date">${formatDate(note.createdAt)}${note.updatedAt && note.updatedAt!==note.createdAt ? ' • آخر تعديل ' + formatDate(note.updatedAt) : ''}</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-danger-ghost" id="delete-note-view-btn">حذف النوت</button>
+      <div class="footer-right">
+        <button class="btn-ghost" id="close-view-btn">إغلاق</button>
+        <button class="btn-primary" id="edit-note-btn">✏️ تعديل</button>
+      </div>
+    </div>
+  `);
+
+  document.getElementById('close-view-modal').onclick = closeModal;
+  document.getElementById('close-view-btn').onclick = closeModal;
+  document.getElementById('edit-note-btn').onclick = ()=>openNoteEditModal(note);
+  document.getElementById('delete-note-view-btn').onclick = ()=>confirmDeleteNote(note);
+  document.querySelectorAll('.view-img').forEach(img=>{
+    img.addEventListener('click', ()=>openLightbox(img.dataset.src));
+  });
+}
+
+/* ===================== Note modal (edit / create) ===================== */
+async function openNoteEditModal(note){
+  // pull the freshest list first so numbering/edits don't clash with other visitors
+  await loadNotesForFolder(currentFolderId, true);
+  renderMain();
+
+  editingNote = note || null;
+  pendingImages = note ? JSON.parse(JSON.stringify(note.images||[])) : [];
+  const folder = folders.find(f=>f.id===currentFolderId);
+  const notes = notesByFolder[currentFolderId] || [];
+  const noteNumber = note ? (notes.findIndex(n=>n.id===note.id)+1) : (notes.length+1);
+
+  showModal(`
+    <div class="modal-header">
+      <h3><span class="note-badge" style="width:28px;height:28px;font-size:12px;">${noteNumber}</span>
+        ${note ? 'تعديل النوت' : 'نوت جديدة'} — ${escapeHtml(folder ? folder.name : '')}
+      </h3>
+      <button class="icon-btn" id="close-note-modal">✕</button>
+    </div>
+    <div class="modal-body">
+      <div>
+        <label class="field-label">العنوان (اختياري)</label>
+        <input type="text" class="text-input" id="note-title-input" maxlength="120"
+          value="${escapeHtml(note ? note.title : '')}" placeholder="عنوان مختصر للنوت">
+      </div>
+      <div>
+        <label class="field-label">المحتوى</label>
+        <textarea class="text-input" id="note-content-input" placeholder="اكتب ملاحظتك هنا...">${escapeHtml(note ? note.content : '')}</textarea>
+      </div>
+      <div>
+        <label class="field-label">الصور</label>
+        <label class="img-upload-btn">
+          🖼️ إضافة صورة
+          <input type="file" accept="image/*" multiple id="note-img-input" style="display:none">
+        </label>
+        <div id="img-previews"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <div>
+        ${note ? '<button class="btn-danger-ghost" id="delete-note-btn">حذف النوت</button>' : ''}
+      </div>
+      <div class="footer-right">
+        <button class="btn-ghost" id="cancel-note-btn">إلغاء</button>
+        <button class="btn-primary" id="save-note-btn">حفظ</button>
+      </div>
+    </div>
+  `);
+
+  renderImgPreviews();
+
+  document.getElementById('close-note-modal').onclick = closeModal;
+  document.getElementById('cancel-note-btn').onclick = closeModal;
+  document.getElementById('note-img-input').addEventListener('change', handleImageInput);
+  document.getElementById('save-note-btn').onclick = saveNote;
+  const delBtn = document.getElementById('delete-note-btn');
+  if(delBtn) delBtn.onclick = ()=>confirmDeleteNote(note);
+}
+
+function renderImgPreviews(){
+  const wrap = document.getElementById('img-previews');
+  if(!wrap) return;
+  wrap.innerHTML = pendingImages.map((im,i)=>`
+    <div class="img-preview">
+      <img src="${im.data}" data-i="${i}">
+      <button class="img-remove" data-i="${i}" title="حذف الصورة">✕</button>
+    </div>
+  `).join('');
+  wrap.querySelectorAll('.img-remove').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      pendingImages.splice(parseInt(btn.dataset.i),1);
+      renderImgPreviews();
+    });
+  });
+  wrap.querySelectorAll('img').forEach(img=>{
+    img.addEventListener('click', ()=>openLightbox(img.src));
+  });
+}
+
+async function handleImageInput(e){
+  const files = Array.from(e.target.files || []);
+  if(!files.length) return;
+  for(const file of files){
+    try{
+      const data = await resizeImage(file);
+      pendingImages.push({ id: uid('img'), data });
+    }catch(err){
+      console.error('image resize failed', err);
+    }
+  }
+  renderImgPreviews();
+  e.target.value = '';
+}
+
+function resizeImage(file){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      const img = new Image();
+      img.onload = ()=>{
+        const maxDim = 1100;
+        let { width, height } = img;
+        if(width > maxDim || height > maxDim){
+          const ratio = Math.min(maxDim/width, maxDim/height);
+          width = Math.round(width*ratio);
+          height = Math.round(height*ratio);
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width; canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', 0.75));
+      };
+      img.onerror = reject;
+      img.src = reader.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function saveNote(){
+  const title = document.getElementById('note-title-input').value.trim();
+  const content = document.getElementById('note-content-input').value.trim();
+  if(!title && !content && pendingImages.length===0){
+    showToast('اكتب حاجة في النوت الأول');
+    return;
+  }
+  // re-fetch fresh right before writing to minimize clobbering other visitors' edits
+  const notes = await sGet('app:notes:' + currentFolderId, true) || [];
+  if(editingNote){
+    const idx = notes.findIndex(n=>n.id===editingNote.id);
+    if(idx > -1){
+      notes[idx] = { ...notes[idx], title, content, images: pendingImages, updatedAt: Date.now() };
+    } else {
+      notes.push({ id: editingNote.id, title, content, images: pendingImages, createdAt: Date.now(), updatedAt: Date.now() });
+    }
+  } else {
+    notes.push({
+      id: uid('n'), title, content, images: pendingImages,
+      createdAt: Date.now(), updatedAt: Date.now()
+    });
+  }
+  notesByFolder[currentFolderId] = notes;
+  await sSet('app:notes:' + currentFolderId, notes, true);
+  closeModal();
+  renderSidebar();
+  renderMain();
+  showToast(editingNote ? 'تم تعديل النوت' : 'تم حفظ النوت');
+}
+
+function confirmDeleteNote(note){
+  showModal(`
+    <div class="modal-header"><h3>🗑 حذف النوت</h3></div>
+    <div class="modal-body">
+      <div class="confirm-text">هتحذف النوت ده نهائيًا لكل اللي بيستخدموا اللينك. الخطوة دي ما تتراجعش فيها.</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" id="cancel-del-note">إلغاء</button>
+      <button class="btn-danger-ghost" id="confirm-del-note">حذف نهائي</button>
+    </div>
+  `);
+  document.getElementById('cancel-del-note').onclick = closeModal;
+  document.getElementById('confirm-del-note').onclick = async ()=>{
+    const notes = await sGet('app:notes:' + currentFolderId, true) || [];
+    const updated = notes.filter(n=>n.id !== note.id);
+    notesByFolder[currentFolderId] = updated;
+    await sSet('app:notes:' + currentFolderId, updated, true);
+    closeModal();
+    renderSidebar();
+    renderMain();
+    showToast('تم حذف النوت');
+  };
+}
+
+/* ===================== Modal infra ===================== */
+function showModal(innerHtml){
+  const root = document.getElementById('modal-root');
+  root.innerHTML = `<div class="overlay" id="modal-overlay"><div class="modal">${innerHtml}</div></div>`;
+  document.getElementById('modal-overlay').addEventListener('mousedown', (e)=>{
+    if(e.target.id === 'modal-overlay') closeModal();
+  });
+}
+function closeModal(){
+  document.getElementById('modal-root').innerHTML = '';
+  editingNote = null;
+  pendingImages = [];
+}
+function openLightbox(src){
+  const root = document.getElementById('modal-root');
+  const lb = document.createElement('div');
+  lb.className = 'lightbox';
+  lb.innerHTML = `<img src="${src}">`;
+  lb.addEventListener('click', ()=>lb.remove());
+  root.appendChild(lb);
+}
+document.addEventListener('keydown', (e)=>{
+  if(e.key === 'Escape'){
+    const lb = document.querySelector('.lightbox');
+    if(lb){ lb.remove(); return; }
+    if(document.getElementById('modal-overlay')) closeModal();
+  }
+});
+
+/* ===================== Mobile sidebar ===================== */
+function openSidebarMobile(){ document.body.classList.add('sidebar-open'); }
+function closeSidebarMobile(){ document.body.classList.remove('sidebar-open'); }
+
+/* ===================== Refresh buttons ===================== */
+document.getElementById('refresh-folders-btn').addEventListener('click', async ()=>{
+  await refreshFolders();
+  if(currentFolderId) await loadNotesForFolder(currentFolderId, true);
+  renderSidebar();
+  renderMain();
+  showToast('تم التحديث');
+});
+document.getElementById('refresh-notes-btn').addEventListener('click', async ()=>{
+  if(!currentFolderId) return;
+  await loadNotesForFolder(currentFolderId, true);
+  renderMain();
+  showToast('تم التحديث');
+});
+
+/* ===================== Theme toggle ===================== */
+document.getElementById('theme-toggle').addEventListener('click', async ()=>{
+  theme = theme === 'dark' ? 'light' : 'dark';
+  applyTheme();
+  await sSet('app:theme', theme, false, true);   // personal, silent on failure
+});
+
+// init moved to firebase bootstrap
+</script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+import { getDatabase, ref, get as dbGet, set as dbSet, remove } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-database.js";
+const firebaseConfig={
+apiKey:"AIzaSyDFXCcd5HxZRRfH9lTSw_I8dHJO4rKvmNk",
+authDomain:"exam-notes-3ssam.firebaseapp.com",
+databaseURL:"https://exam-notes-3ssam-default-rtdb.europe-west1.firebasedatabase.app",
+projectId:"exam-notes-3ssam",
+storageBucket:"exam-notes-3ssam.firebasestorage.app",
+messagingSenderId:"901496869239",
+appId:"1:901496869239:web:6d816826e466cefa1d5172"
+};
+const app=initializeApp(firebaseConfig);
+const db=getDatabase(app);
+window.storage={
+async get(key,shared){
+if(!shared){const v=localStorage.getItem(key);return v?{value:v}:null;}
+const p=key.replace(/:/g,'/');
+const s=await dbGet(ref(db,p));
+return s.exists()?{value:JSON.stringify(s.val())}:null;
+},
+async set(key,value,shared){
+if(!shared){localStorage.setItem(key,value);return;}
+await dbSet(ref(db,key.replace(/:/g,'/')),JSON.parse(value));
+},
+async delete(key,shared){
+if(!shared){localStorage.removeItem(key);return;}
+await remove(ref(db,key.replace(/:/g,'/')));
+}
+};
+if(typeof init==='function') init();
+</script>
+</body>
+</html>
